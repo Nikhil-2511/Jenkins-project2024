@@ -1,0 +1,34 @@
+	CREATE A PIPELINE VIA AL CODE IN AZURE DEVOPS. 	
+
+
+
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  BuildConfiguration: 'Release'
+  AppSourceFolder: 'src'
+  AppName: 'MyApp'
+  OutputFolder: '$(Build.ArtifactStagingDirectory)'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '6.x'
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- script: |
+    dotnet restore $(AppSourceFolder)/$(AppName).alproj
+    dotnet build $(AppSourceFolder)/$(AppName).alproj --configuration $(BuildConfiguration) --output $(OutputFolder)
+  displayName: 'Build the AL project'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(OutputFolder)'
+    artifactName: 'ALExtension'
+
+
